@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>毛孩家園 - 動物領養與照顧要點資訊看板</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icon CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Noto Sans TC & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        },
+                        warmGray: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            800: '#292524',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            background-color: #fcfbf9;
+            color: #292524;
+        }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 25px -10px rgba(180, 83, 9, 0.15);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f5f5f4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Accordion Smooth Transition */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0, 1, 0, 1), opacity 0.25s ease-in-out;
+            opacity: 0;
+        }
+        .accordion-content.open {
+            max-height: 1000px;
+            transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-100 selection:text-amber-800">
+
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-30 border-b border-amber-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Brand / Logo -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('adoption')">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center text-white shadow-md shadow-amber-200">
+                        <i class="fa-solid fa-paw text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-700 via-amber-600 to-emerald-700 bg-clip-text text-transparent">
+                            毛孩家園
+                        </h1>
+                        <p class="text-xs text-stone-500 font-medium">認養代替購買 ‧ 陪伴愛不打折</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs (Desktop) -->
+                <nav class="hidden md:flex space-x-2 bg-stone-100 p-1.5 rounded-xl border border-stone-200">
+                    <button id="nav-tab-adoption" onclick="switchTab('adoption')" class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 bg-white text-amber-700 shadow-sm">
+                        <i class="fa-solid fa-heart text-amber-500"></i>
+                        尋找毛孩 (領養資訊)
+                    </button>
+                    <button id="nav-tab-care" onclick="switchTab('care')" class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 text-stone-600 hover:text-amber-700 hover:bg-white/50">
+                        <i class="fa-solid fa-book-medical text-emerald-600"></i>
+                        衛教要點 (照顧指南)
+                    </button>
+                </nav>
+
+                <!-- Data Status Badge -->
+                <div id="status-badge" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="status-text">開放資料連線中...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Tabs -->
+        <div class="md:hidden flex border-t border-stone-100 bg-white">
+            <button id="mobile-tab-adoption" onclick="switchTab('adoption')" class="flex-1 py-3 text-center text-xs font-bold border-b-2 border-amber-600 text-amber-700 flex justify-center items-center gap-1.5">
+                <i class="fa-solid fa-heart text-amber-500"></i> 尋找毛孩
+            </button>
+            <button id="mobile-tab-care" onclick="switchTab('care')" class="flex-1 py-3 text-center text-xs font-bold text-stone-500 border-b-2 border-transparent flex justify-center items-center gap-1.5">
+                <i class="fa-solid fa-book-medical text-emerald-600"></i> 照顧指南
+            </button>
+        </div>
+    </header>
+
+    <section class="bg-gradient-to-b from-amber-50/60 to-transparent py-8 sm:py-10 border-b border-amber-100/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+                <span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold mb-3">
+                    🐾 給牠一個溫暖的家
+                </span>
+                <h2 id="page-title" class="text-2xl sm:text-3xl font-extrabold text-stone-800 tracking-tight">
+                    尋找您生命中的理想毛孩夥伴
+                </h2>
+                <p id="page-subtitle" class="mt-2 text-sm sm:text-base text-stone-600 max-w-2xl">
+                    即時彙整全國公立收容所待領養動物資料，讓我們一起以領養代替購買，用愛打造溫馨家庭。
+                </p>
+            </div>
+            <!-- Quick Stats Bar -->
+            <div id="hero-stats" class="flex gap-4 sm:gap-6 bg-white p-4 rounded-2xl border border-stone-200/80 shadow-sm">
+                <div class="text-center px-2">
+                    <p class="text-xs text-stone-500 font-medium">資料庫總數</p>
+                    <p id="stat-total" class="text-xl sm:text-2xl font-black text-amber-600">0</p>
+                </div>
+                <div class="w-px bg-stone-200"></div>
+                <div class="text-center px-2">
+                    <p class="text-xs text-stone-500 font-medium">符合篩選</p>
+                    <p id="stat-filtered" class="text-xl sm:text-2xl font-black text-emerald-600">0</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fallback / Mock Banner Alert -->
+    <div id="mock-alert" class="hidden bg-amber-500 text-white text-xs sm:text-sm py-2 px-4 text-center font-medium shadow-inner flex items-center justify-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>目前使用「離線展示資料庫 (Mock Data)」。即時 API 服務連線逾時或遭瀏覽器限制，資訊僅供測試參考。</span>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: ADOPTION SECTION (尋找毛孩) -->
+        <!-- ========================================== -->
+        <div id="section-adoption" class="space-y-6">
+
+            <!-- Filter Panel -->
+            <div class="bg-white p-5 sm:p-6 rounded-2xl border border-stone-200 shadow-sm space-y-5">
+                
+                <!-- Category Quick Switch -->
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-stone-100 pb-4">
+                    <label class="text-sm font-bold text-stone-700 flex items-center gap-2">
+                        <i class="fa-solid fa-filter text-amber-500"></i> 動物種類：
+                    </label>
+                    <div class="flex flex-wrap gap-2" id="species-filter-group">
+                        <button onclick="setSpeciesFilter('ALL')" id="species-btn-ALL" class="species-btn active px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-amber-500 text-white shadow-sm">
+                            <i class="fa-solid fa-border-all"></i> 全部
+                        </button>
+                        <button onclick="setSpeciesFilter('狗')" id="species-btn-狗" class="species-btn px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-stone-100 text-stone-600 hover:bg-stone-200">
+                            <i class="fa-solid fa-dog"></i> 狗狗
+                        </button>
+                        <button onclick="setSpeciesFilter('貓')" id="species-btn-貓" class="species-btn px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-stone-100 text-stone-600 hover:bg-stone-200">
+                            <i class="fa-solid fa-cat"></i> 貓咪
+                        </button>
+                        <button onclick="setSpeciesFilter('OTHER')" id="species-btn-OTHER" class="species-btn px-4 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-stone-100 text-stone-600 hover:bg-stone-200">
+                            <i class="fa-solid fa-dove"></i> 其他動物
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- County Select -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 mb-1.5">縣市 / 地區</label>
+                        <select id="filter-county" onchange="applyFilters()" class="w-full bg-stone-50 border border-stone-200 text-stone-800 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all">
+                            <option value="">全部縣市</option>
+                        </select>
+                    </div>
+
+                    <!-- Gender Select -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 mb-1.5">性別</label>
+                        <select id="filter-sex" onchange="applyFilters()" class="w-full bg-stone-50 border border-stone-200 text-stone-800 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all">
+                            <option value="">全部性別</option>
+                            <option value="M">公 (Male)</option>
+                            <option value="F">母 (Female)</option>
+                            <option value="N">未定 / 未知</option>
+                        </select>
+                    </div>
+
+                    <!-- Body Size Select -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 mb-1.5">體型</label>
+                        <select id="filter-bodytype" onchange="applyFilters()" class="w-full bg-stone-50 border border-stone-200 text-stone-800 text-sm rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all">
+                            <option value="">全部體型</option>
+                            <option value="BIG">大型</option>
+                            <option value="MEDIUM">中型</option>
+                            <option value="SMALL">小型</option>
+                        </select>
+                    </div>
+
+                    <!-- Keyword Search -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 mb-1.5">關鍵字搜尋</label>
+                        <div class="relative">
+                            <input type="text" id="filter-keyword" onkeyup="applyFilters()" placeholder="品種、收容所或備註..." class="w-full bg-stone-50 border border-stone-200 text-stone-800 text-sm rounded-xl pl-9 pr-3 py-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-none transition-all">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-stone-400 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Action Row -->
+                <div class="flex items-center justify-between pt-2">
+                    <p class="text-xs text-stone-500 font-medium">
+                        找到 <span id="filtered-count" class="font-bold text-amber-600 text-sm">0</span> 隻等待溫暖家的毛孩
+                    </p>
+                    <button onclick="resetFilters()" class="text-xs text-stone-500 hover:text-amber-600 font-semibold flex items-center gap-1 transition-colors">
+                        <i class="fa-solid fa-arrow-rotate-left"></i> 清除重設條件
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading Spinner State -->
+            <div id="loading-state" class="py-20 text-center space-y-4">
+                <div class="inline-block w-12 h-12 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
+                <p class="text-stone-500 font-medium text-sm">正在連線取得收容所開放資料，請稍候...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden py-16 bg-white rounded-2xl border border-stone-200 text-center space-y-4">
+                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-paw"></i>
+                </div>
+                <h3 class="text-lg font-bold text-stone-800">查無符合條件的毛孩</h3>
+                <p class="text-stone-500 text-sm max-w-sm mx-auto">嘗試放寬篩選條件或清除搜尋關鍵字，看看其他的等家小寶貝吧！</p>
+                <button onclick="resetFilters()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm shadow-md shadow-amber-200 transition-all">
+                    重設所有條件
+                </button>
+            </div>
+
+            <div id="animal-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Animal cards injected via JS -->
+            </div>
+
+            <div id="pagination-container" class="hidden bg-white p-4 rounded-2xl border border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 shadow-sm">
+                <span class="text-xs sm:text-sm text-stone-600 font-medium">
+                    顯示第 <span id="page-start" class="font-bold text-stone-800">0</span> - <span id="page-end" class="font-bold text-stone-800">0</span> 筆，共 <span id="page-total" class="font-bold text-stone-800">0</span> 筆
+                </span>
+                <div id="pagination-buttons" class="flex items-center space-x-1.5">
+                    <!-- Pagination Buttons Injected via JS -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: CARE TIPS SECTION (衛教要點) -->
+        <!-- ========================================== -->
+        <div id="section-care" class="hidden space-y-8">
+            
+            <!-- Care Header & Species Switcher -->
+            <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0" id="care-species-group">
+                    <button onclick="setCareSpecies('dog')" id="care-tab-dog" class="care-tab-btn active px-5 py-2.5 rounded-xl font-bold text-sm bg-emerald-600 text-white shadow-sm flex items-center gap-2 shrink-0 transition-all">
+                        <i class="fa-solid fa-dog"></i> 狗狗照顧指南
+                    </button>
+                    <button onclick="setCareSpecies('cat')" id="care-tab-cat" class="care-tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-stone-100 text-stone-600 hover:bg-stone-200 flex items-center gap-2 shrink-0 transition-all">
+                        <i class="fa-solid fa-cat"></i> 貓咪照顧指南
+                    </button>
+                    <button onclick="setCareSpecies('general')" id="care-tab-general" class="care-tab-btn px-5 py-2.5 rounded-xl font-bold text-sm bg-stone-100 text-stone-600 hover:bg-stone-200 flex items-center gap-2 shrink-0 transition-all">
+                        <i class="fa-solid fa-heart-pulse"></i> 領養心態與法律
+                    </button>
+                </div>
+
+                <!-- Search inside Care Section -->
+                <div class="relative w-full md:w-72">
+                    <input type="text" id="care-search-input" onkeyup="filterCareAccordion()" placeholder="搜尋衛教關鍵字（如：疫苗、飲食）..." class="w-full bg-stone-50 border border-stone-200 text-stone-800 text-sm rounded-xl pl-9 pr-3 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-stone-400 text-xs"></i>
+                </div>
+            </div>
+
+            <!-- Featured Pet Photo Gallery in Care Section -->
+            <div class="bg-white rounded-3xl border border-stone-200 p-6 shadow-sm flex flex-col md:flex-row items-center gap-6">
+                <div class="relative w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden bg-stone-100 shadow-inner group">
+                    <img id="care-random-photo" src="" alt="寵物寫真" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <div class="absolute bottom-3 left-3 bg-stone-900/70 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5">
+                        <i class="fa-solid fa-camera text-amber-400"></i>
+                        <span id="care-photo-caption">可愛毛孩寫真集</span>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> 衛教寫真主題區
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-extrabold text-stone-800">
+                        愛牠，就從了解牠的日常需求開始 🐾
+                    </h3>
+                    <p class="text-stone-600 text-sm leading-relaxed">
+                        妥善照顧毛孩不僅需要滿滿的愛心，更需要正確的專業養護知識。點擊下方按鈕可隨機切換可愛毛孩寫真照片！
+                    </p>
+                    <button onclick="refreshCareRandomPhoto()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-md shadow-emerald-200 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-dice text-amber-300"></i> 隨機換一張寵物照片
+                    </button>
+                </div>
+            </div>
+
+            <!-- Care Accordions container -->
+            <div id="care-content-container" class="space-y-4">
+                <!-- Care Accordion Items Injected by JS -->
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Animal Detail Modal -->
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-stone-100 my-8">
+            <!-- Modal Header / Close Button -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 z-10 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-all">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Modal Body Injected by JS -->
+            <div id="modal-content" class="max-h-[85vh] overflow-y-auto">
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-stone-200 py-8 mt-12 text-center text-stone-500 text-xs sm:text-sm">
+        <div class="max-w-7xl mx-auto px-4 space-y-3">
+            <div class="flex items-center justify-center gap-2 text-amber-600 font-bold">
+                <i class="fa-solid fa-paw"></i>
+                <span>毛孩家園 ‧ 動物領養與衛教資訊看板</span>
+            </div>
+            <p class="text-stone-400">
+                資料來源：農業部公立動物收容所線上領養開放資料 API (`QcbUEzN6E6DL`)
+            </p>
+            <p class="text-stone-400">
+                支持「領養代替購買，不棄養」 ‧ 給每隻毛孩一個溫暖的歸宿
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const CARE_DATA = {
+            dog: [
+                {
+                    title: '🐶 飲食與飲食安全指南',
+                    content: '<p class="text-stone-600 mb-2"><strong>1. 均衡主食：</strong>選用符合 AAFCO/FEDIAF 國際標準的成犬/幼犬乾糧或濕糧。切勿餵食人類高油高鹽的剩菜剩飯。</p><p class="text-stone-600"><strong>2. 致命禁忌食物：</strong>巧克力、洋蔥、大蒜、葡萄及葡萄乾、木糖醇（口香糖成份）、煮熟的禽類骨頭（易碎裂刺穿腸胃）。</p>'
+                },
+                {
+                    title: '💉 預防針、狂犬病疫苗與驅蟲',
+                    content: '<p class="text-stone-600 mb-2"><strong>1. 核心疫苗：</strong>依動保法規定每年需定期施打狂犬病疫苗，並建議每年補強多合一預防針。</p><p class="text-stone-600"><strong>2. 體內外驅蟲：</strong>每月按時使用心絲蟲預防藥，以及預防跳蚤、壁虱等體外寄生蟲藥品。</p>'
+                },
+                {
+                    title: '🏡 運動量與法規寵物登記',
+                    content: '<p class="text-stone-600 mb-2"><strong>1. 每日散步：</strong>中大型犬每日建議累積 45-60 分鐘活動時間，小型犬約 20-30 分鐘，外出務必緊繫牽繩。</p><p class="text-stone-600"><strong>2. 晶片登記與絕育：</strong>領養後需至獸醫院完成寵物登記植入晶片，並依規定完成絕育手術。</p>'
+                }
+            ],
+            cat: [
+                {
+                    title: '🐱 貓咪飲水技巧與營養',
+                    content: '<p class="text-stone-600 mb-2"><strong>1. 充足水分：</strong>貓咪天生渴感較低，建議搭配主食罐或流動飲水機增加攝水，有效預防腎臟病與下泌尿道結石。</p><p class="text-stone-600"><strong>2. 純肉食性飲食：</strong>貓咪需要高優質蛋白與必需胺基酸（如牛磺酸），不可餵食素食。</p>'
+                },
+                {
+                    title: '🚽 貓砂盆設定與居家居家防護',
+                    content: '<p class="text-stone-600 mb-2"><strong>1. 貓砂盆法則：</strong>數量為「N+1」（貓隻數 + 1 個貓砂盆），置於通風隱密處，每日至少清理 1-2 次。</p><p class="text-stone-600"><strong>2. 門窗防護門網：</strong>貓咪好奇心強，高樓住宅務必加裝防墜隱形鐵窗或防抓網，避免「貓飛樓」意外發生。</p>'
+                },
+                {
+                    title: '💉 定期健檢與醫療照顧',
+                    content: '<p class="text-stone-600"><strong>1. 疫苗防護：</strong>定期接種貓核心三合一或五合一疫苗。<br><strong>2. 健檢頻率：</strong>7歲以下建議每年一次健檢，7歲以上老貓建議每半年定期檢查。</p>'
+                }
+            ],
+            general: [
+                {
+                    title: '📋 領養前的自我評估',
+                    content: '<p class="text-stone-600"><strong>1. 時間與壽命承諾：</strong>毛孩壽命約 12-20 年，需確認未來結婚、搬家、工作變動均能不離不棄。<br><strong>2. 經濟能力：</strong>需評估每月飼料、貓砂、預防藥以及突發疾病的急診醫療費用預算。</p>'
+                },
+                {
+                    title: '⚖️ 動物保護法規定與終身陪伴',
+                    content: '<p class="text-stone-600">依《動物保護法》規定，飼主不得任意棄養寵物，棄養者可處新臺幣 3 萬元以上 15 萬元以下罰鍰。請以領養代替購買，用愛陪伴牠的一生。</p>'
+                }
+            ]
+        };
+
+        const CARE_PHOTOS = {
+            dog: [
+                { url: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80', caption: '🐕 快樂奔跑的可愛狗狗' },
+                { url: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80', caption: '🐶 眼神溫柔的汪星人' },
+                { url: 'https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=80', caption: '🐾 好奇心滿滿的小狗' },
+                { url: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?auto=format&fit=crop&w=800&q=80', caption: '🎾 喜歡互動遊戲的毛孩' }
+            ],
+            cat: [
+                { url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80', caption: '🐱 愜意曬太陽的主子' },
+                { url: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=800&q=80', caption: '🐈 充滿好奇心的喵星人' },
+                { url: 'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=800&q=80', caption: '🐾 帥氣酷酷的貓咪' },
+                { url: 'https://images.unsplash.com/photo-1561948955-570b270e7c36?auto=format&fit=crop&w=800&q=80', caption: '😺 撒嬌討摸的毛小孩' }
+            ],
+            general: [
+                { url: 'https://images.unsplash.com/photo-1450778869186-39d3243f3537?auto=format&fit=crop&w=800&q=80', caption: '❤️ 溫馨和諧的寵物家庭' },
+                { url: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80', caption: '🐾 陪伴是最長情的告白' },
+                { url: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?auto=format&fit=crop&w=800&q=80', caption: '🏥 定期陪伴照顧健康' }
+            ]
+        };
+
+        const MOCK_ANIMALS = [
+            {
+                animal_id: '1091105001',
+                animal_subid: '1091105001-01',
+                animal_kind: '狗',
+                animal_Variety: '米克斯 (混種狗)',
+                animal_sex: 'M',
+                animal_bodytype: 'MEDIUM',
+                animal_colour: '黃褐色',
+                animal_age: 'ADULT',
+                animal_sterilization: 'T',
+                animal_bacterin: 'T',
+                animal_foundplace: '臺北市內湖區潭美街',
+                animal_place: '臺北市動物之家',
+                shelter_tel: '02-87913064',
+                shelter_address: '臺北市內湖區潭美街852號',
+                animal_remark: '個性親人活潑，喜歡玩球，已經完成絕育與疫苗施打，期待一個溫暖的家庭。'
+            },
+            {
+                animal_id: '1091105002',
+                animal_subid: '1091105002-02',
+                animal_kind: '貓',
+                animal_Variety: '虎斑貓',
+                animal_sex: 'F',
+                animal_bodytype: 'SMALL',
+                animal_colour: '棕虎斑',
+                animal_age: 'CHILD',
+                animal_sterilization: 'F',
+                animal_bacterin: 'T',
+                animal_foundplace: '新北市板橋區',
+                animal_place: '新北市板橋區市立動物之家',
+                shelter_tel: '02-89662158',
+                shelter_address: '新北市板橋區板城路28號',
+                animal_remark: '好奇心強的小幼貓，踏踏頻率極高，適合細心有愛心的新手貓奴。'
+            },
+            {
+                animal_id: '1091105003',
+                animal_subid: '1091105003-03',
+                animal_kind: '貓',
+                animal_Variety: '橘貓',
+                animal_sex: 'M',
+                animal_bodytype: 'BIG',
+                animal_colour: '橘色',
+                animal_age: 'ADULT',
+                animal_sterilization: 'T',
+                animal_bacterin: 'T',
+                animal_foundplace: '台中市南屯區',
+                animal_place: '臺中市動物之家南屯園區',
+                shelter_tel: '04-23850949',
+                shelter_address: '臺中市南屯區中台路601號',
+                animal_remark: '大胖橘一枚，極度討摸且會開柴油引擎聲，食慾良好。'
+            },
+            {
+                animal_id: '1091105004',
+                animal_subid: '1091105004-04',
+                animal_kind: '狗',
+                animal_Variety: '黑狗混種',
+                animal_sex: 'F',
+                animal_bodytype: 'MEDIUM',
+                animal_colour: '黑色',
+                animal_age: 'ADULT',
+                animal_sterilization: 'T',
+                animal_bacterin: 'T',
+                animal_foundplace: '高雄市壽山',
+                animal_place: '高雄市壽山動物保護教育園區',
+                shelter_tel: '07-5519059',
+                shelter_address: '高雄市鼓山區萬壽路350號',
+                animal_remark: '聰明學習快，已會基本坐下握手命令，需要較多戶外活動時間。'
+            }
+        ];
+
+        const API_URL = 'https://corsproxy.io/?https://data.moa.gov.tw/Service/OpenData/TransService.aspx?UnitId=QcbUEzN6E6DL';
+
+        let allAnimals = [];
+        let filteredAnimals = [];
+        let isMockData = false;
+
+        let currentPage = 1;
+        const pageSize = 12;
+
+        let currentSpecies = 'ALL';
+        let currentCounty = '';
+        let currentSex = '';
+        let currentBodyType = '';
+        let currentKeyword = '';
+
+        let currentCareSpecies = 'dog';
+
+        window.onload = function() {
+            initApp();
+        };
+
+        async function initApp() {
+            renderCareContent();
+            refreshCareRandomPhoto();
+            await fetchAnimalsData();
+        }
+
+        async function fetchAnimalsData() {
+            const loadingState = document.getElementById('loading-state');
+            const statusText = document.getElementById('status-text');
+            const mockAlert = document.getElementById('mock-alert');
+
+            if (loadingState) loadingState.classList.remove('hidden');
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+            try {
+                const response = await fetch(API_URL, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                
+                const data = await response.json();
+
+                if (Array.isArray(data) && data.length > 0) {
+                    allAnimals = data;
+                    if (statusText) statusText.innerText = '開放資料即時同步中';
+                    isMockData = false;
+                } else {
+                    throw new Error('API returned empty dataset');
+                }
+            } catch (err) {
+                console.warn('API連線失敗或逾時，切換至官方示範資料模式:', err.message);
+                allAnimals = MOCK_ANIMALS;
+                isMockData = true;
+                if (statusText) statusText.innerText = '離線展示模式';
+                if (mockAlert) mockAlert.classList.remove('hidden');
+            } finally {
+                if (loadingState) loadingState.classList.add('hidden');
+                populateCountyOptions();
+                applyFilters();
+            }
+        }
+
+        function switchTab(tab) {
+            const secAdoption = document.getElementById('section-adoption');
+            const secCare = document.getElementById('section-care');
+            const pageTitle = document.getElementById('page-title');
+            const pageSubtitle = document.getElementById('page-subtitle');
+            const heroStats = document.getElementById('hero-stats');
+
+            const navAdoption = document.getElementById('nav-tab-adoption');
+            const navCare = document.getElementById('nav-tab-care');
+            const mobileAdoption = document.getElementById('mobile-tab-adoption');
+            const mobileCare = document.getElementById('mobile-tab-care');
+
+            if (tab === 'adoption') {
+                secAdoption.classList.remove('hidden');
+                secCare.classList.add('hidden');
+
+                if (pageTitle) pageTitle.innerText = '尋找您生命中的理想毛孩夥伴';
+                if (pageSubtitle) pageSubtitle.innerText = '即時彙整全國公立收容所待領養動物資料，讓我們一起以領養代替購買，用愛打造溫馨家庭。';
+                if (heroStats) heroStats.classList.remove('hidden');
+
+                if (navAdoption) {
+                    navAdoption.className = 'px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 bg-white text-amber-700 shadow-sm';
+                }
+                if (navCare) {
+                    navCare.className = 'px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 text-stone-600 hover:text-amber-700 hover:bg-white/50';
+                }
+                if (mobileAdoption) {
+                    mobileAdoption.className = 'flex-1 py-3 text-center text-xs font-bold border-b-2 border-amber-600 text-amber-700 flex justify-center items-center gap-1.5';
+                }
+                if (mobileCare) {
+                    mobileCare.className = 'flex-1 py-3 text-center text-xs font-bold text-stone-500 border-b-2 border-transparent flex justify-center items-center gap-1.5';
+                }
+            } else {
+                secAdoption.classList.add('hidden');
+                secCare.classList.remove('hidden');
+
+                if (pageTitle) pageTitle.innerText = '寵物衛教與日常照顧要點指南';
+                if (pageSubtitle) pageSubtitle.innerText = '提供新手貓狗飼主最齊全的飲食、疫苗、疾病預防與法規指引，讓毛孩健康快樂成長。';
+                if (heroStats) heroStats.classList.add('hidden');
+
+                if (navCare) {
+                    navCare.className = 'px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 bg-white text-emerald-700 shadow-sm';
+                }
+                if (navAdoption) {
+                    navAdoption.className = 'px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2 text-stone-600 hover:text-amber-700 hover:bg-white/50';
+                }
+                if (mobileCare) {
+                    mobileCare.className = 'flex-1 py-3 text-center text-xs font-bold border-b-2 border-emerald-600 text-emerald-700 flex justify-center items-center gap-1.5';
+                }
+                if (mobileAdoption) {
+                    mobileAdoption.className = 'flex-1 py-3 text-center text-xs font-bold text-stone-500 border-b-2 border-transparent flex justify-center items-center gap-1.5';
+                }
+
+                refreshCareRandomPhoto();
+            }
+        }
+
+        function populateCountyOptions() {
+            const countySelect = document.getElementById('filter-county');
+            if (!countySelect) return;
+
+            const counties = new Set();
+            allAnimals.forEach(item => {
+                const loc = (item.animal_place || '') + (item.shelter_address || '') + (item.animal_foundplace || '');
+                const match = loc.match(/(臺北市|台北市|新北市|基隆市|桃園市|新竹市|新竹縣|苗栗縣|臺中市|台中市|彰化縣|南投縣|雲林縣|嘉義市|嘉義縣|臺南市|台南市|高雄市|屏東縣|宜蘭縣|花蓮縣|臺東縣|台東縣|澎湖縣|金門縣|連江縣)/);
+                if (match) counties.add(match[1].replace('台北', '臺北').replace('台中', '臺中').replace('台南', '臺南').replace('台東', '臺東'));
+            });
+
+            if (counties.size === 0) {
+                ['臺北市', '新北市', '桃園市', '臺中市', '臺南市', '高雄市'].forEach(c => counties.add(c));
+            }
+
+            const currentVal = countySelect.value;
+            countySelect.innerHTML = '<option value="">全部縣市</option>';
+            Array.from(counties).sort().forEach(county => {
+                const opt = document.createElement('option');
+                opt.value = county;
+                opt.textContent = county;
+                if (county === currentVal) opt.selected = true;
+                countySelect.appendChild(opt);
+            });
+        }
+
+        function setSpeciesFilter(species) {
+            currentSpecies = species;
+            document.querySelectorAll('.species-btn').forEach(btn => {
+                btn.classList.remove('bg-amber-500', 'text-white', 'shadow-sm', 'active');
+                btn.classList.add('bg-stone-100', 'text-stone-600');
+            });
+
+            const activeBtn = document.getElementById(`species-btn-${species}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-stone-100', 'text-stone-600');
+                activeBtn.classList.add('bg-amber-500', 'text-white', 'shadow-sm', 'active');
+            }
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const countyEl = document.getElementById('filter-county');
+            const sexEl = document.getElementById('filter-sex');
+            const bodyEl = document.getElementById('filter-bodytype');
+            const kwEl = document.getElementById('filter-keyword');
+
+            currentCounty = countyEl ? countyEl.value : '';
+            currentSex = sexEl ? sexEl.value : '';
+            currentBodyType = bodyEl ? bodyEl.value : '';
+            currentKeyword = kwEl ? kwEl.value.trim().toLowerCase() : '';
+
+            filteredAnimals = allAnimals.filter(animal => {
+                if (currentSpecies === '狗' && animal.animal_kind !== '狗') return false;
+                if (currentSpecies === '貓' && animal.animal_kind !== '貓') return false;
+                if (currentSpecies === 'OTHER' && (animal.animal_kind === '狗' || animal.animal_kind === '貓')) return false;
+
+                if (currentCounty) {
+                    const fullLoc = (animal.animal_place || '') + (animal.shelter_address || '') + (animal.animal_foundplace || '');
+                    if (!fullLoc.includes(currentCounty) && !fullLoc.includes(currentCounty.replace('臺', '台'))) return false;
+                }
+
+                if (currentSex && animal.animal_sex !== currentSex) return false;
+                if (currentBodyType && animal.animal_bodytype !== currentBodyType) return false;
+
+                if (currentKeyword) {
+                    const searchSource = `${animal.animal_Variety || ''} ${animal.animal_place || ''} ${animal.animal_remark || ''} ${animal.animal_subid || ''} ${animal.animal_foundplace || ''}`.toLowerCase();
+                    if (!searchSource.includes(currentKeyword)) return false;
+                }
+
+                return true;
+            });
+
+            currentPage = 1;
+            updateStats();
+            renderAnimalsGrid();
+        }
+
+        function resetFilters() {
+            if (document.getElementById('filter-county')) document.getElementById('filter-county').value = '';
+            if (document.getElementById('filter-sex')) document.getElementById('filter-sex').value = '';
+            if (document.getElementById('filter-bodytype')) document.getElementById('filter-bodytype').value = '';
+            if (document.getElementById('filter-keyword')) document.getElementById('filter-keyword').value = '';
+            setSpeciesFilter('ALL');
+        }
+
+        function updateStats() {
+            const statTotal = document.getElementById('stat-total');
+            const statFiltered = document.getElementById('stat-filtered');
+            const filteredCount = document.getElementById('filtered-count');
+
+            if (statTotal) statTotal.innerText = allAnimals.length;
+            if (statFiltered) statFiltered.innerText = filteredAnimals.length;
+            if (filteredCount) filteredCount.innerText = filteredAnimals.length;
+        }
+
+        function renderAnimalsGrid() {
+            const grid = document.getElementById('animal-grid');
+            const emptyState = document.getElementById('empty-state');
+            const paginationContainer = document.getElementById('pagination-container');
+
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            if (filteredAnimals.length === 0) {
+                if (emptyState) emptyState.classList.remove('hidden');
+                if (paginationContainer) paginationContainer.classList.add('hidden');
+                return;
+            }
+
+            if (emptyState) emptyState.classList.add('hidden');
+            if (paginationContainer) paginationContainer.classList.remove('hidden');
+
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, filteredAnimals.length);
+            const pageAnimals = filteredAnimals.slice(startIndex, endIndex);
+
+            pageAnimals.forEach(animal => {
+                grid.appendChild(createAnimalCard(animal));
+            });
+
+            renderPagination(startIndex, endIndex);
+        }
+
+        function createAnimalCard(animal) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-2xl p-5 border border-stone-200 card-hover flex flex-col justify-between cursor-pointer space-y-4';
+            card.onclick = () => openModal(animal);
+
+            const sexBadge = animal.animal_sex === 'M' 
+                ? '<span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md text-xs font-bold"><i class="fa-solid fa-mars"></i> 公</span>'
+                : animal.animal_sex === 'F'
+                ? '<span class="bg-pink-100 text-pink-700 px-2.5 py-1 rounded-md text-xs font-bold"><i class="fa-solid fa-venus"></i> 母</span>'
+                : '<span class="bg-stone-100 text-stone-600 px-2.5 py-1 rounded-md text-xs font-bold">未定</span>';
+
+            const bodyBadge = animal.animal_bodytype === 'BIG' ? '大型' : animal.animal_bodytype === 'MEDIUM' ? '中型' : '小型';
+            const variety = animal.animal_Variety || animal.animal_kind || '可愛毛孩';
+            const location = animal.animal_place || '公立收容所';
+            const sterText = animal.animal_sterilization === 'T' ? '已絕育' : '未絕育';
+
+            card.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between gap-2 border-b border-stone-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-amber-500 text-white px-2.5 py-0.5 rounded-lg text-xs font-bold shadow-sm">
+                                ${animal.animal_kind || '寵物'}
+                            </span>
+                            <span class="bg-stone-100 text-stone-700 px-2 py-0.5 rounded-lg text-xs font-medium">
+                                ${bodyBadge}
+                            </span>
+                        </div>
+                        ${sexBadge}
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-stone-800 text-lg truncate" title="${variety}">
+                            ${variety}
+                        </h3>
+                        <p class="text-xs text-stone-400 font-mono mt-0.5">
+                            編號：${animal.animal_subid || animal.animal_id || '無'}
+                        </p>
+                    </div>
+
+                    <div class="space-y-2 text-xs text-stone-600 bg-stone-50 p-3 rounded-xl">
+                        <p class="flex items-center gap-1.5 truncate">
+                            <i class="fa-solid fa-location-dot text-amber-500 w-4 text-center"></i>
+                            <span class="truncate font-medium" title="${location}">${location}</span>
+                        </p>
+                        <p class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-scissors text-emerald-600 w-4 text-center"></i>
+                            <span>絕育狀態：<strong class="text-stone-800">${sterText}</strong></span>
+                        </p>
+                        <p class="flex items-start gap-1.5 line-clamp-2 text-stone-500 mt-1">
+                            <i class="fa-solid fa-circle-info text-amber-500 w-4 text-center mt-0.5"></i>
+                            <span>${animal.animal_remark || '無特殊備註'}</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-stone-100 flex items-center justify-between text-xs font-bold text-amber-700">
+                    <span>查看詳細檔案與聯絡電話</span>
+                    <i class="fa-solid fa-chevron-right text-stone-400"></i>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function renderPagination(startIndex, endIndex) {
+            const pageStart = document.getElementById('page-start');
+            const pageEnd = document.getElementById('page-end');
+            const pageTotal = document.getElementById('page-total');
+            const buttonsContainer = document.getElementById('pagination-buttons');
+
+            if (pageStart) pageStart.innerText = filteredAnimals.length > 0 ? startIndex + 1 : 0;
+            if (pageEnd) pageEnd.innerText = endIndex;
+            if (pageTotal) pageTotal.innerText = filteredAnimals.length;
+
+            if (!buttonsContainer) return;
+            buttonsContainer.innerHTML = '';
+
+            const totalPages = Math.ceil(filteredAnimals.length / pageSize);
+            if (totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${currentPage === 1 ? 'opacity-50 cursor-not-allowed bg-stone-100 text-stone-400' : 'bg-stone-100 text-stone-700 hover:bg-amber-100 hover:text-amber-700'}`;
+            prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => goToPage(currentPage - 1);
+            buttonsContainer.appendChild(prevBtn);
+
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+
+            if (startPage > 1) {
+                buttonsContainer.appendChild(createPageBtn(1));
+                if (startPage > 2) {
+                    const dots = document.createElement('span');
+                    dots.className = 'px-1 text-stone-400 text-xs';
+                    dots.innerText = '...';
+                    buttonsContainer.appendChild(dots);
+                }
+            }
+
+            for (let p = startPage; p <= endPage; p++) {
+                buttonsContainer.appendChild(createPageBtn(p));
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const dots = document.createElement('span');
+                    dots.className = 'px-1 text-stone-400 text-xs';
+                    dots.innerText = '...';
+                    buttonsContainer.appendChild(dots);
+                }
+                buttonsContainer.appendChild(createPageBtn(totalPages));
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed bg-stone-100 text-stone-400' : 'bg-stone-100 text-stone-700 hover:bg-amber-100 hover:text-amber-700'}`;
+            nextBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => goToPage(currentPage + 1);
+            buttonsContainer.appendChild(nextBtn);
+        }
+
+        function createPageBtn(page) {
+            const btn = document.createElement('button');
+            const isActive = page === currentPage;
+            btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isActive ? 'bg-amber-500 text-white shadow-sm' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`;
+            btn.innerText = page;
+            btn.onclick = () => goToPage(page);
+            return btn;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderAnimalsGrid();
+            window.scrollTo({ top: 350, behavior: 'smooth' });
+        }
+
+        function openModal(animal) {
+            const modal = document.getElementById('detail-modal');
+            const modalContent = document.getElementById('modal-content');
+
+            const sexText = animal.animal_sex === 'M' ? '公 (Male)' : animal.animal_sex === 'F' ? '母 (Female)' : '未知/未記錄';
+            const bodyText = animal.animal_bodytype === 'BIG' ? '大型' : animal.animal_bodytype === 'MEDIUM' ? '中型' : '小型';
+            const sterText = animal.animal_sterilization === 'T' ? '已絕育' : '未絕育 / 待評估';
+            const vacText = animal.animal_bacterin === 'T' ? '已施打狂犬病疫苗' : '未施打 / 待評估';
+
+            modalContent.innerHTML = `
+                <div class="bg-gradient-to-r from-amber-600 to-amber-500 p-6 sm:p-8 text-white">
+                    <span class="px-3 py-1 rounded-md bg-white/20 backdrop-blur-md text-xs font-bold inline-block mb-2">
+                        ${animal.animal_kind || '動物'} ‧ ${bodyText}
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold">${animal.animal_Variety || '可愛毛孩'}</h2>
+                    <p class="text-amber-100 text-xs sm:text-sm mt-1 font-mono">系統代號：${animal.animal_subid || animal.animal_id || '未提供'}</p>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-stone-50 p-3 rounded-xl border border-stone-200/80 text-center">
+                            <p class="text-xs text-stone-400 font-medium">性別</p>
+                            <p class="text-sm font-bold text-stone-800 mt-1">${sexText}</p>
+                        </div>
+                        <div class="bg-stone-50 p-3 rounded-xl border border-stone-200/80 text-center">
+                            <p class="text-xs text-stone-400 font-medium">體型</p>
+                            <p class="text-sm font-bold text-stone-800 mt-1">${bodyText}</p>
+                        </div>
+                        <div class="bg-stone-50 p-3 rounded-xl border border-stone-200/80 text-center">
+                            <p class="text-xs text-stone-400 font-medium">絕育狀態</p>
+                            <p class="text-sm font-bold text-stone-800 mt-1">${sterText}</p>
+                        </div>
+                        <div class="bg-stone-50 p-3 rounded-xl border border-stone-200/80 text-center">
+                            <p class="text-xs text-stone-400 font-medium">狂犬病疫苗</p>
+                            <p class="text-sm font-bold text-stone-800 mt-1">${vacText}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 border-t border-stone-100 pt-4 text-sm">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-building-flag text-amber-500 mt-1"></i>
+                            <div>
+                                <p class="text-xs text-stone-400 font-medium">收容園區</p>
+                                <p class="text-stone-800 font-semibold">${animal.animal_place || '公立收容所'}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-phone text-amber-500 mt-1"></i>
+                            <div>
+                                <p class="text-xs text-stone-400 font-medium">聯絡電話</p>
+                                <a href="tel:${animal.shelter_tel}" class="text-amber-700 font-semibold hover:underline">${animal.shelter_tel || '未提供'}</a>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-map-location-dot text-amber-500 mt-1"></i>
+                            <div>
+                                <p class="text-xs text-stone-400 font-medium">園區地址</p>
+                                <p class="text-stone-800 font-semibold">${animal.shelter_address || '未提供'}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-comment-dots text-amber-500 mt-1"></i>
+                            <div>
+                                <p class="text-xs text-stone-400 font-medium">備註說明</p>
+                                <p class="text-stone-600 bg-amber-50/50 p-3 rounded-xl border border-amber-100 mt-1 leading-relaxed">
+                                    ${animal.animal_remark || '目前無額外備註，歡迎直接聯繫收容所預約現場看毛孩。'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex flex-col sm:flex-row gap-3">
+                        <a href="tel:${animal.shelter_tel}" class="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-center shadow-md shadow-emerald-200 transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-phone"></i> 直接電話聯繫預約
+                        </a>
+                        <button onclick="closeModal()" class="py-3 px-6 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl transition-all">
+                            關閉視窗
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detail-modal');
+            if (modal) modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function refreshCareRandomPhoto() {
+            const photoEl = document.getElementById('care-random-photo');
+            const captionEl = document.getElementById('care-photo-caption');
+            if (!photoEl) return;
+
+            const pool = CARE_PHOTOS[currentCareSpecies] || CARE_PHOTOS.general;
+            const randomItem = pool[Math.floor(Math.random() * pool.length)];
+
+            photoEl.style.opacity = '0.3';
+            setTimeout(() => {
+                photoEl.src = randomItem.url;
+                if (captionEl) captionEl.innerText = randomItem.caption;
+                photoEl.style.opacity = '1';
+            }, 200);
+        }
+
+        function setCareSpecies(species) {
+            currentCareSpecies = species;
+
+            document.querySelectorAll('.care-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-sm', 'active');
+                btn.classList.add('bg-stone-100', 'text-stone-600');
+            });
+
+            const activeBtn = document.getElementById(`care-tab-${species}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-stone-100', 'text-stone-600');
+                activeBtn.classList.add('bg-emerald-600', 'text-white', 'shadow-sm', 'active');
+            }
+
+            refreshCareRandomPhoto();
+            renderCareContent();
+        }
+
+        function renderCareContent() {
+            const container = document.getElementById('care-content-container');
+            if (!container) return;
+
+            const items = CARE_DATA[currentCareSpecies] || [];
+            container.innerHTML = '';
+
+            items.forEach((item, idx) => {
+                const accordion = document.createElement('div');
+                accordion.className = 'care-accordion-item bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-sm transition-all';
+
+                const accId = `accordion-body-${idx}`;
+
+                accordion.innerHTML = `
+                    <button onclick="toggleAccordion('${accId}')" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-stone-50 transition-colors">
+                        <span class="font-bold text-stone-800 text-base flex items-center gap-2">
+                            ${item.title}
+                        </span>
+                        <i id="icon-${accId}" class="fa-solid fa-chevron-down text-stone-400 transition-transform duration-300"></i>
+                    </button>
+                    <div id="${accId}" class="accordion-content px-6 border-t border-stone-100 bg-stone-50/50">
+                        <div class="py-4">
+                            ${item.content}
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(accordion);
+            });
+
+            if (items.length > 0) {
+                toggleAccordion('accordion-body-0');
+            }
+        }
+
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(`icon-${id}`);
+
+            if (!content) return;
+
+            const isOpen = content.classList.contains('open');
+
+            if (isOpen) {
+                content.classList.remove('open');
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('open');
+                if (icon) icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        function filterCareAccordion() {
+            const kwInput = document.getElementById('care-search-input');
+            if (!kwInput) return;
+
+            const keyword = kwInput.value.trim().toLowerCase();
+            const accordions = document.querySelectorAll('.care-accordion-item');
+
+            accordions.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                if (text.includes(keyword)) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
